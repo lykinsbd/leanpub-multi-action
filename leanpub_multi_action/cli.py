@@ -2,7 +2,6 @@
 
 import datetime
 import sys
-from typing import Optional
 
 import click
 
@@ -44,12 +43,12 @@ from leanpub_multi_action.leanpub import Leanpub
     help="Check the job status of a Preview or Publish on Leanpub.",
 )
 def main(
-    leanpub_api_key: Optional[str] = None,
-    book_slug: Optional[str] = None,
+    leanpub_api_key: str | None = None,
+    book_slug: str | None = None,
     preview: bool = False,
     publish: bool = False,
     email_readers: bool = False,
-    release_notes: Optional[str] = None,
+    release_notes: str | None = None,
     check_status: bool = False,
 ) -> None:
     """Entrypoint into our script.
