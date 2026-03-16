@@ -10,9 +10,7 @@ from invoke import task
 try:
     import toml
 except ImportError:
-    sys.exit(
-        "Please make sure to `pip install toml` or enable the virtual environment."
-    )
+    sys.exit("Please make sure to `pip install toml` or enable the virtual environment.")
 
 
 PYPROJECT_CONFIG = toml.load("pyproject.toml")
@@ -40,7 +38,7 @@ def run_cmd(
     hide=False,
     error_message="An unknown error has occurred!",
 ):
-    """Wrapper to run the invoke task commands.
+    """Run the invoke task command.
 
     Args:
         context ([invoke.task]): Invoke task object.
@@ -51,6 +49,7 @@ def run_cmd(
 
     Returns:
         result (obj): Contains Invoke result from running task.
+
     """
     print(f"LOCAL - Running command {exec_cmd}")
     result = context.run(exec_cmd, pty=pty, hide=hide, warn=True)
@@ -121,17 +120,10 @@ def pytest(context):
 
 
 @task
-def black(context):
-    """Run black to check that Python files adherence to black standards."""
-    exec_cmd = "black --check --diff ."
-    run_cmd(context, exec_cmd)
-
-
-@task
-def flake8(context):
-    """Run flake8 code analysis."""
-    exec_cmd = "flake8 ."
-    run_cmd(context, exec_cmd)
+def ruff(context):
+    """Run ruff linter and formatter checks."""
+    run_cmd(context, "ruff check .")
+    run_cmd(context, "ruff format --check .")
 
 
 @task
@@ -149,58 +141,11 @@ def yamllint(context):
 
 
 @task
-def pydocstyle(context):
-    """Run pydocstyle to validate docstring formatting adheres to NTC defined standards."""
-    exec_cmd = "pydocstyle ."
-    run_cmd(context, exec_cmd)
-
-
-@task
-def bandit(context):
-    """Run bandit to validate basic static code security analysis."""
-    exec_cmd = "bandit --recursive ./ --configfile .bandit.yml"
-    run_cmd(context, exec_cmd)
-
-
-@task
-def isort(context):
-    """Run isort to validate import sortting order is standard."""
-    exec_cmd = "isort . --check --diff"
-    run_cmd(context, exec_cmd)
-
-
-@task
-def cli(context):
-    """Enter the image to perform troubleshooting or dev work."""
-    dev = f"docker run -it -v {PWD}:/local {IMAGE_NAME}:{IMAGE_VER} /bin/bash"
-    print(f"{dev}")
-    context.run(f"{dev}", pty=True)
-
-
-@task
-def preview(context):
-    """Test the 'Preview' functionality in the container."""
-    command = (
-        f"docker run -t "
-        f"-e INPUT_LEANPUB-API-KEY={LEANPUB_API_KEY} "
-        f"-e INPUT_LEANPUB-BOOK-SLUG={LEANPUB_BOOK_SLUG} "
-        f"-e INPUT_PREVIEW=true"
-        f"{IMAGE_NAME}:{IMAGE_VER}"
-    )
-    # print(f"{command}")  # Commenting out as this can print secrets
-    context.run(f"{command}", pty=True)
-
-
-@task
 def tests(context):
     """Run all tests for this repository."""
-    black(context)
-    isort(context)
-    flake8(context)
+    ruff(context)
     pylint(context)
     yamllint(context)
-    pydocstyle(context)
-    bandit(context)
     pytest(context)
 
     print("All tests have passed!")
@@ -225,9 +170,7 @@ def pre_release(context, patch=False, minor=False, major=False):
 
     # Check if more than one type was specified (or none)
     if not patch and not minor and not major:
-        raise invoke.exceptions.Exit(
-            "You must specify a patch/minor/major version bump!"
-        )
+        raise invoke.exceptions.Exit("You must specify a patch/minor/major version bump!")
     if patch and (minor or major):
         raise invoke.exceptions.Exit("You must only specify ONE of patch/minor/major!")
     if minor and (patch or major):
@@ -266,16 +209,12 @@ def pre_release(context, patch=False, minor=False, major=False):
         parts[2] = "0"
     new_image_ver = ".".join(parts)
 
-    print(
-        f"Starting pre-release actions to perform a {bump_type} version bump on {IMAGE_NAME}:{IMAGE_VER}"
-    )
+    print(f"Starting pre-release actions to perform a {bump_type} version bump on {IMAGE_NAME}:{IMAGE_VER}")
 
     # Update version in pyproject.toml
     pyproject = pathlib.Path("pyproject.toml")
     pyproject.write_text(
-        pyproject.read_text(encoding="utf8").replace(
-            f'version = "{current_ver}"', f'version = "{new_image_ver}"'
-        ),
+        pyproject.read_text(encoding="utf8").replace(f'version = "{current_ver}"', f'version = "{new_image_ver}"'),
         encoding="utf8",
     )
     print(f"Project now at {IMAGE_NAME}:{new_image_ver}")
@@ -284,9 +223,7 @@ def pre_release(context, patch=False, minor=False, major=False):
     changelog = pathlib.Path("CHANGELOG.rst")
     current_changelog = changelog.read_text(encoding="utf8")
     changelog.write_text(
-        pathlib.Path(PYPROJECT_CONFIG["tool"]["towncrier"]["filename"]).read_text(
-            encoding="utf8"
-        )
+        pathlib.Path(PYPROJECT_CONFIG["tool"]["towncrier"]["filename"]).read_text(encoding="utf8")
         + "\n\n"
         + current_changelog,
         encoding="utf8",

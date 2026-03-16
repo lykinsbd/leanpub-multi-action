@@ -1,41 +1,42 @@
+---
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.4
+  - repo: "https://github.com/astral-sh/ruff-pre-commit"
+    rev: "v0.8.4"
     hooks:
-      - id: ruff
-        args: [--fix]
-      - id: ruff-format
+      - id: "ruff"
+        args: ["--fix"]
+      - id: "ruff-format"
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+  - repo: "https://github.com/pre-commit/pre-commit-hooks"
+    rev: "v5.0.0"
     hooks:
-      - id: check-yaml
-      - id: check-toml
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-added-large-files
-      - id: detect-private-key
+      - id: "check-yaml"
+      - id: "check-toml"
+      - id: "end-of-file-fixer"
+      - id: "trailing-whitespace"
+      - id: "check-added-large-files"
+      - id: "detect-private-key"
 
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
+  - repo: "https://github.com/adrienverge/yamllint"
+    rev: "v1.35.1"
     hooks:
-      - id: yamllint
+      - id: "yamllint"
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.13.0
+  - repo: "https://github.com/pre-commit/mirrors-mypy"
+    rev: "v1.13.0"
     hooks:
-      - id: mypy
-        args: [--ignore-missing-imports]
-        additional_dependencies: [types-requests, types-toml]
+      - id: "mypy"
+        args: ["--ignore-missing-imports"]
+        additional_dependencies: ["types-requests", "types-toml"]
 
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.43.0
+  - repo: "https://github.com/igorshubovych/markdownlint-cli"
+    rev: "v0.43.0"
     hooks:
-      - id: markdownlint
-        args: [--fix, --disable, MD013]
+      - id: "markdownlint"
+        args: ["--fix", "--disable", "MD013"]
 
-  - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v3.6.0
+  - repo: "https://github.com/compilerla/conventional-pre-commit"
+    rev: "v3.6.0"
     hooks:
-      - id: conventional-pre-commit
-        stages: [commit-msg]
+      - id: "conventional-pre-commit"
+        stages: ["commit-msg"]

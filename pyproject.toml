@@ -14,16 +14,12 @@ dev = [
     "pytest",
     "requests-mock",
     "pyyaml",
-    "black",
+    "ruff",
     "pylint",
-    "pydocstyle",
     "yamllint",
-    "bandit",
     "invoke",
     "toml",
-    "flake8",
     "towncrier",
-    "isort",
     "pre-commit",
     "mypy",
     "types-requests",
@@ -36,39 +32,28 @@ lma = "leanpub_multi_action.cli:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.black]
+[tool.ruff]
 line-length = 120
-target-version = ["py39"]
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-  | settings.py     # This is where you define files that should not be stylized by black
-                     # the root of the project
-)
-'''
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "D", "S"]
+ignore = ["E501", "D203", "D213"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["leanpub_multi_action"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "D"]
 
 [tool.pylint.basic]
 # No docstrings required for private methods (Pylint default), or for test_ functions, or for inner Meta classes.
 no-docstring-rgx="^(_|test_|Meta$)"
 
 [tool.pylint.messages_control]
-# Line length is enforced by Black, so pylint doesn't need to check it.
-# Pylint and Black disagree about how to format multi-line arrays; Black wins.
+# Line length is enforced by ruff, so pylint doesn't need to check it.
 disable = """,
     line-too-long,
-    bad-continuation,
     """
 
 [tool.pylint.miscellaneous]
@@ -89,8 +74,3 @@ package = "leanpub_multi_action"
 filename = "RELEASE_NOTES.rst"
 single_file = false
 name = "Leanpub Multi Action"
-
-[tool.isort]
-profile = "black"
-skip_gitignore = true
-line_length = 120

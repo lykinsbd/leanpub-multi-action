@@ -23,12 +23,8 @@ from leanpub_multi_action.leanpub import Leanpub
         "Will also look for 'INPUT_LEANPUB-BOOK-SLUG' environment variable."
     ),
 )
-@click.option(
-    "--preview", envvar="INPUT_PREVIEW", is_flag=True, help="Preview a book on Leanpub."
-)
-@click.option(
-    "--publish", envvar="INPUT_PUBLISH", is_flag=True, help="Publish a book on Leanpub."
-)
+@click.option("--preview", envvar="INPUT_PREVIEW", is_flag=True, help="Preview a book on Leanpub.")
+@click.option("--publish", envvar="INPUT_PUBLISH", is_flag=True, help="Publish a book on Leanpub.")
 @click.option(
     "--email_readers",
     envvar="INPUT_EMAIL-READERS",
@@ -61,15 +57,20 @@ def main(
     Publish, Preview, or Check Status on an existing Publish/Preview job.
 
     Args:
-        leanpub_api_key (bool): API Key for the Leanpub API.
+        leanpub_api_key (str): API Key for the Leanpub API.
             If not set, will error out.
-        book_slug (bool): Unique book name from the leanpub URL of the book.
+        book_slug (str): Unique book name from the leanpub URL of the book.
             i.e. the 'mybook' portion of https://leanpub.com/mybook
             If not set, will error out.
-        check_status(bool): Check the job status of a Preview or Publish on Leanpub.
+        preview (bool): Preview a book on Leanpub.
+        publish (bool): Publish a book on Leanpub.
+        email_readers (bool): Email readers about the new publish.
+        release_notes (str): Release notes for the publish.
+        check_status (bool): Check the job status of a Preview or Publish on Leanpub.
 
     Returns:
         int: exit_code as an integer to return to OS
+
     """
     exit_code = 0
 
