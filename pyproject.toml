@@ -3,11 +3,24 @@ name = "leanpub-multi-action"
 version = "2.0.0"
 description = "GitHub Actions for Leanpub.com"
 authors = [{name = "Brett Lykins", email = "lykinsbd@gmail.com"}]
+readme = "README.md"
+license = "MIT"
 requires-python = ">=3.13"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+]
 dependencies = [
     "requests>=2",
     "click>=8",
 ]
+
+[project.urls]
+Homepage = "https://github.com/lykinsbd/leanpub-multi-action"
+Repository = "https://github.com/lykinsbd/leanpub-multi-action"
+Issues = "https://github.com/lykinsbd/leanpub-multi-action/issues"
 
 [dependency-groups]
 dev = [
