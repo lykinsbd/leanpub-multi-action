@@ -67,3 +67,19 @@ class Leanpub(requests.Session):
             return None, exception
 
         return resp, None
+
+    def check_status(self, book_slug: str) -> Tuple[Optional[requests.Response], Optional[requests.RequestException]]:
+        """Check the job status of a Preview or Publish for the book_slug provided.
+
+        Args:
+            book_slug (str): book_slug to check status of
+        """
+        url = f"{self.leanpub_url}{book_slug}/book_status.json"
+        params = {"api_key": self.leanpub_api_key}
+        try:
+            resp = self.get(url=url, params=params)
+            resp.raise_for_status()
+        except requests.RequestException as exception:
+            return None, exception
+
+        return resp, None
