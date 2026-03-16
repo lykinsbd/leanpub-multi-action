@@ -8,4 +8,4 @@ COPY leanpub_multi_action/ leanpub_multi_action/
 
 RUN uv sync --frozen --no-dev
 
-ENTRYPOINT [ "uv", "run", "lma" ]
+ENTRYPOINT [ "/app/.venv/bin/lma" ]
