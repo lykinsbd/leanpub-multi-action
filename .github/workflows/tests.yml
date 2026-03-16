@@ -45,6 +45,13 @@ jobs:
         uses: "./.github/actions/setup-environment"
       - name: "Linting: Pylint"
         run: "uv run invoke pylint"
+  markdownlint:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v4"
+      - name: "Linting: markdownlint"
+        uses: "DavidAnson/markdownlint-cli2-action@v19"
   pytest:
     strategy:
       fail-fast: true
@@ -75,4 +82,5 @@ jobs:
       - "ruff"
       - "yamllint"
       - "pylint"
+      - "markdownlint"
       - "pytest"

@@ -33,7 +33,7 @@ repos:
     rev: "v0.43.0"
     hooks:
       - id: "markdownlint"
-        args: ["--fix", "--disable", "MD013"]
+        args: ["--fix"]
 
   - repo: "https://github.com/compilerla/conventional-pre-commit"
     rev: "v3.6.0"
