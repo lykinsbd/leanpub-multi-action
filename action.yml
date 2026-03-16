@@ -24,6 +24,10 @@ inputs:
   release-notes:
     description: "Release notes for the publish"
     required: false
+  check-status:
+    description: "Check the job status of a Preview or Publish"
+    required: false
+    default: false
 runs:
   using: "docker"
   image: "docker://ghcr.io/lykinsbd/leanpub-multi-action:latest"

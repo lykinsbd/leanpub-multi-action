@@ -26,7 +26,7 @@ from leanpub_multi_action.leanpub import Leanpub
 @click.option("--publish", envvar="INPUT_PUBLISH", is_flag=True, help="Publish a book on Leanpub.")
 @click.option("--email_readers", envvar="INPUT_EMAIL-READERS", is_flag=True, help="Email readers about the new publish.")
 @click.option("--release_notes", envvar="INPUT_RELEASE-NOTES", default=None, help="Release notes for the publish.")
-@click.option("--check_status", is_flag=True, help="Check the job status of a Preview or Publish on Leanpub.")
+@click.option("--check_status", envvar="INPUT_CHECK-STATUS", is_flag=True, help="Check the job status of a Preview or Publish on Leanpub.")
 def main(
     leanpub_api_key: str = None,
     book_slug: str = None,
@@ -55,25 +55,23 @@ def main(
 
     # Attempt to find API Key
     if not leanpub_api_key:
-        exit_code = 1
         print("No Leanpub API Key Found!")
-        return exit_code
+        sys.exit(1)
 
     # Attempt to find Book Slug
     if not book_slug:
-        exit_code = 1
         print("No Leanpub Book Slug Found!")
-        return exit_code
+        sys.exit(1)
 
     print("Leanpub API Key and Book Slug found")
 
     # We need to be doing one of the three possible actions
     if not publish and not preview and not check_status:
-        exit_code = 1
         print("Must either Publish, Preview, or Check Status!")
-        return exit_code
+        sys.exit(1)
 
     err = None
+    exit_code = 0
 
     # Instantiate the Leanpub client
     leanpub = Leanpub(leanpub_api_key=leanpub_api_key)
@@ -118,8 +116,8 @@ def main(
             print("Unknown error has occurred!")
             exit_code = 1
 
-    return exit_code
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
