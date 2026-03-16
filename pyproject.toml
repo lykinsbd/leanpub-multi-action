@@ -1,6 +1,6 @@
 [project]
 name = "leanpub-multi-action"
-version = "1.0.2"
+version = "2.0.0"
 description = "GitHub Actions for Leanpub.com"
 authors = [{name = "Brett Lykins", email = "lykinsbd@gmail.com"}]
 requires-python = ">=3.13"
