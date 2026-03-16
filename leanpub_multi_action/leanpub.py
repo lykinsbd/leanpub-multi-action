@@ -42,3 +42,28 @@ class Leanpub(requests.Session):
             return None, exception
 
         return resp, None
+
+    def publish(
+        self,
+        book_slug: str,
+        email_readers: bool = False,
+        release_notes: Optional[str] = None,
+    ) -> Tuple[Optional[requests.Response], Optional[requests.RequestException]]:
+        """Publish the book_slug provided.
+
+        Args:
+            book_slug (str): book_slug to publish
+            email_readers (bool): Whether to email readers about the new version
+            release_notes (str): Optional release notes for this publish
+        """
+        url = f"{self.leanpub_url}{book_slug}/publish.json"
+        payload = {"api_key": self.leanpub_api_key, "publish[email_readers]": email_readers}
+        if release_notes:
+            payload["publish[release_notes]"] = release_notes
+        try:
+            resp = self.post(url=url, data=payload)
+            resp.raise_for_status()
+        except requests.RequestException as exception:
+            return None, exception
+
+        return resp, None

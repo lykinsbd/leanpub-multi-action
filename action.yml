@@ -13,6 +13,17 @@ inputs:
     description: "Start a Preview job"
     required: false
     default: false
+  publish:
+    description: "Publish the book"
+    required: false
+    default: false
+  email-readers:
+    description: "Email readers about the new publish"
+    required: false
+    default: false
+  release-notes:
+    description: "Release notes for the publish"
+    required: false
 runs:
   using: "docker"
   image: "docker://ghcr.io/lykinsbd/leanpub-multi-action:latest"
