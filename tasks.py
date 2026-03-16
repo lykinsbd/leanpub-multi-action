@@ -9,18 +9,18 @@ from invoke import task
 try:
     import toml
 except ImportError:
-    sys.exit("Please make sure to `pip install toml` or enable the Poetry shell and run `poetry install`.")
+    sys.exit("Please make sure to `pip install toml` or enable the virtual environment.")
 
 
 PYPROJECT_CONFIG = toml.load("pyproject.toml")
-TOOL_CONFIG = PYPROJECT_CONFIG["tool"]["poetry"]
+PROJECT_CONFIG = PYPROJECT_CONFIG["project"]
 
 # Can be set to a separate Python version to be used for launching or building image
 INVOKE_PYTHON_VER = os.getenv("INVOKE_PYTHON_VER", "3.9")
 # Name of the docker image/image
-IMAGE_NAME = os.getenv("IMAGE_NAME", TOOL_CONFIG["name"])
+IMAGE_NAME = os.getenv("IMAGE_NAME", PROJECT_CONFIG["name"])
 # Tag for the image
-IMAGE_VER = os.getenv("IMAGE_VER", f"{TOOL_CONFIG['version']}")
+IMAGE_VER = os.getenv("IMAGE_VER", f"{PROJECT_CONFIG['version']}")
 # Leanpub API Key for testing
 LEANPUB_API_KEY = os.getenv("LEANPUB_API_KEY", "test_api_key!")
 # Leanpub Book Slug for testing
@@ -67,17 +67,13 @@ def build(context, cache=True, force_rm=False, hide=False):
     print(f"Building Python package {python_name}")
     run_cmd(
         context=context,
-        exec_cmd="poetry build",
+        exec_cmd="uv build",
         pty=False,
         error_message=f"Failed to build Python package {python_name}",
     )
 
     print(f"Building Docker image {docker_name}")
-    command = (
-        f"docker build --tag {docker_name} "
-        f"--build-arg LMA_VERSION={IMAGE_VER} --build-arg WHEEL_DIR=dist "
-        f"-f Dockerfile ."
-    )
+    command = f"docker build --tag {docker_name} -f Dockerfile ."
 
     if not cache:
         command += " --no-cache"
@@ -245,15 +241,28 @@ def pre_release(context, patch=False, minor=False, major=False):
         ),
     )
 
-    print(f"Starting pre-release actions to perform a {bump_type} version bump on {IMAGE_NAME}:{IMAGE_VER}")
-    run_cmd(
-        context,
-        exec_cmd=f"poetry version {bump_type}",
-        pty=False,
-        error_message=f"Unable to perform {bump_type} update on {IMAGE_NAME}:{IMAGE_VER}!",
-    )
+    # Compute new version
+    current_ver = PROJECT_CONFIG["version"]
+    parts = current_ver.split(".")
+    if bump_type == "patch":
+        parts[2] = str(int(parts[2]) + 1)
+    elif bump_type == "minor":
+        parts[1] = str(int(parts[1]) + 1)
+        parts[2] = "0"
+    elif bump_type == "major":
+        parts[0] = str(int(parts[0]) + 1)
+        parts[1] = "0"
+        parts[2] = "0"
+    new_image_ver = ".".join(parts)
 
-    new_image_ver = run_cmd(context, "poetry version --short | tr -d '\n'", False).stdout
+    print(f"Starting pre-release actions to perform a {bump_type} version bump on {IMAGE_NAME}:{IMAGE_VER}")
+
+    # Update version in pyproject.toml
+    pyproject = pathlib.Path("pyproject.toml")
+    pyproject.write_text(
+        pyproject.read_text(encoding="utf8").replace(f'version = "{current_ver}"', f'version = "{new_image_ver}"'),
+        encoding="utf8",
+    )
     print(f"Project now at {IMAGE_NAME}:{new_image_ver}")
 
     print("Copying existing Release Notes to Changelog")
@@ -291,7 +300,7 @@ def pre_release(context, patch=False, minor=False, major=False):
     print(
         "\nNOTE - To finish the release process you will need to:\n"
         "\t1: Open a PR and merge these changes into `main`\n"
-        "\t2: Run `invoke release` from the Poetry shell"
+        "\t2: Run `invoke release` from the uv shell"
     )
 
 

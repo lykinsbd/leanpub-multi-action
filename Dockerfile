@@ -1,15 +1,11 @@
 FROM python:3.9-slim
 
-ARG LMA_VERSION
-ENV LEANPUB_MULTI_ACTION_VERSION $LMA_VERSION
-ARG WHEEL_DIR .
-ENV WHEEL_DIR $WHEEL_DIR
-
-RUN pip install --no-cache-dir --upgrade pip
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
-COPY $WHEEL_DIR/leanpub_multi_action-$LEANPUB_MULTI_ACTION_VERSION-py3-none-any.whl /app
+COPY pyproject.toml uv.lock ./
+COPY leanpub_multi_action/ leanpub_multi_action/
 
-RUN pip install --no-cache-dir leanpub_multi_action-$LEANPUB_MULTI_ACTION_VERSION-py3-none-any.whl
+RUN uv sync --frozen --no-dev
 
-ENTRYPOINT [ "lma" ]
+ENTRYPOINT [ "uv", "run", "lma" ]

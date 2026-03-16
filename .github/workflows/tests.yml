@@ -13,118 +13,118 @@ name: "Test Runner"
 
 jobs:
   black:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
       - name: "Linting: black"
-        run: "poetry run invoke black"
+        run: "uv run invoke black"
   isort:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
       - name: "Linting: isort"
-        run: "poetry run invoke isort"
+        run: "uv run invoke isort"
     needs:
       - "black"
   bandit:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
       - name: "Linting: bandit"
-        run: "poetry run invoke bandit"
+        run: "uv run invoke bandit"
     needs:
       - "black"
   pydocstyle:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
       - name: "Linting: pydocstyle"
-        run: "poetry run invoke pydocstyle"
+        run: "uv run invoke pydocstyle"
     needs:
       - "black"
   flake8:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
       - name: "Linting: flake8"
-        run: "poetry run invoke flake8"
+        run: "uv run invoke flake8"
     needs:
       - "black"
   yamllint:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
       - name: "Linting: yamllint"
-        run: "poetry run invoke yamllint"
+        run: "uv run invoke yamllint"
     needs:
       - "black"
   pylint:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
       - name: "Linting: Pylint"
-        run: "poetry run invoke pylint"
+        run: "uv run invoke pylint"
     needs:
       - "black"
   pytest:
     strategy:
       fail-fast: true
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
       - name: "Run Tests"
-        run: "poetry run invoke pytest"
+        run: "uv run invoke pytest"
     needs:
       - "black"
   build:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-latest"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
       - name: "Test building the Python package and Docker container"
-        run: "poetry run invoke build"
+        run: "uv run invoke build"
     needs:
       - "isort"
       - "bandit"

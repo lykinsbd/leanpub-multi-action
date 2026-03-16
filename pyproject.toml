@@ -1,31 +1,37 @@
-[tool.poetry]
+[project]
 name = "leanpub-multi-action"
 version = "1.0.2"
 description = "GitHub Actions for Leanpub.com"
-authors = ["Brett Lykins <lykinsbd@gmail.com>"]
+authors = [{name = "Brett Lykins", email = "lykinsbd@gmail.com"}]
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2",
+    "click>=8",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-requests = "^2"
-click = "^8"
+[dependency-groups]
+dev = [
+    "pytest",
+    "requests-mock",
+    "pyyaml",
+    "black",
+    "pylint",
+    "pydocstyle",
+    "yamllint",
+    "bandit",
+    "invoke",
+    "toml",
+    "flake8",
+    "towncrier",
+    "isort",
+]
 
-[tool.poetry.dev-dependencies]
-pytest = "*"
-requests_mock = "*"
-pyyaml = "*"
-black = "*"
-pylint = "*"
-pydocstyle = "*"
-yamllint = "*"
-bandit = "*"
-invoke = "*"
-toml = "*"
-flake8 = "*"
-towncrier = "*"
-isort = "*"
-
-[tool.poetry.scripts]
+[project.scripts]
 lma = "leanpub_multi_action.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.black]
 line-length = 120
@@ -68,10 +74,6 @@ notes = """,
     FIXME,
     XXX,
     """
-
-[build-system]
-requires = ["poetry>=1.1"]
-build-backend = "poetry.masonry.api"
 
 [tool.pytest.ini_options]
 testpaths = [
