@@ -106,7 +106,17 @@ def main(
 
     # Check if we are checking :lulz:
     if check_status:
-        pass  # TODO: make this happen
+        print(f"Checking status of '{book_slug}'")
+        resp, err = leanpub.check_status(book_slug=book_slug)
+        if err is not None:
+            print(err)
+            exit_code = 1
+        elif resp.status_code == 200:
+            status = resp.json()
+            print(f"Status: {status}")
+        else:
+            print("Unknown error has occurred!")
+            exit_code = 1
 
     return exit_code
 
