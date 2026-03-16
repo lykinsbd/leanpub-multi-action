@@ -54,9 +54,6 @@ no-docstring-rgx="^(_|test_|Meta$)"
 # Line length is enforced by ruff, so pylint doesn't need to check it.
 disable = """,
     line-too-long,
-    too-many-arguments,
-    too-many-positional-arguments,
-    too-many-branches,
     """
 
 [tool.pylint.miscellaneous]
