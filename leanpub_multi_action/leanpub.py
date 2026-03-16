@@ -4,8 +4,6 @@ API Docs: https://leanpub.com/help/api
 API URL: https://leanpub.com/
 """
 
-from typing import Optional
-
 import requests
 
 
@@ -29,7 +27,7 @@ class Leanpub(requests.Session):
         self.leanpub_api_key = leanpub_api_key
         self.leanpub_url = "https://leanpub.com/"
 
-    def preview(self, book_slug: str) -> tuple[Optional[requests.Response], Optional[requests.RequestException]]:
+    def preview(self, book_slug: str) -> tuple[requests.Response | None, requests.RequestException | None]:
         """Request a Preview be built of the book_slug provided.
 
         Args:
@@ -50,8 +48,8 @@ class Leanpub(requests.Session):
         self,
         book_slug: str,
         email_readers: bool = False,
-        release_notes: Optional[str] = None,
-    ) -> tuple[Optional[requests.Response], Optional[requests.RequestException]]:
+        release_notes: str | None = None,
+    ) -> tuple[requests.Response | None, requests.RequestException | None]:
         """Publish the book_slug provided.
 
         Args:
@@ -75,7 +73,7 @@ class Leanpub(requests.Session):
 
         return resp, None
 
-    def check_status(self, book_slug: str) -> tuple[Optional[requests.Response], Optional[requests.RequestException]]:
+    def check_status(self, book_slug: str) -> tuple[requests.Response | None, requests.RequestException | None]:
         """Check the job status of a Preview or Publish for the book_slug provided.
 
         Args:
