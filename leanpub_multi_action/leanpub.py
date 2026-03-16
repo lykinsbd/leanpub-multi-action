@@ -27,7 +27,9 @@ class Leanpub(requests.Session):
         self.leanpub_api_key = leanpub_api_key
         self.leanpub_url = "https://leanpub.com/"
 
-    def preview(self, book_slug: str) -> Tuple[Optional[requests.Response], Optional[requests.RequestException]]:
+    def preview(
+        self, book_slug: str
+    ) -> Tuple[Optional[requests.Response], Optional[requests.RequestException]]:
         """Request a Preview be built of the book_slug provided.
 
         Args:
@@ -57,7 +59,10 @@ class Leanpub(requests.Session):
             release_notes (str): Optional release notes for this publish
         """
         url = f"{self.leanpub_url}{book_slug}/publish.json"
-        payload = {"api_key": self.leanpub_api_key, "publish[email_readers]": email_readers}
+        payload = {
+            "api_key": self.leanpub_api_key,
+            "publish[email_readers]": email_readers,
+        }
         if release_notes:
             payload["publish[release_notes]"] = release_notes
         try:
@@ -68,7 +73,9 @@ class Leanpub(requests.Session):
 
         return resp, None
 
-    def check_status(self, book_slug: str) -> Tuple[Optional[requests.Response], Optional[requests.RequestException]]:
+    def check_status(
+        self, book_slug: str
+    ) -> Tuple[Optional[requests.Response], Optional[requests.RequestException]]:
         """Check the job status of a Preview or Publish for the book_slug provided.
 
         Args:

@@ -2,6 +2,7 @@
 
 import datetime
 import sys
+from typing import Optional
 
 import click
 
@@ -22,20 +23,39 @@ from leanpub_multi_action.leanpub import Leanpub
         "Will also look for 'INPUT_LEANPUB-BOOK-SLUG' environment variable."
     ),
 )
-@click.option("--preview", envvar="INPUT_PREVIEW", is_flag=True, help="Preview a book on Leanpub.")
-@click.option("--publish", envvar="INPUT_PUBLISH", is_flag=True, help="Publish a book on Leanpub.")
-@click.option("--email_readers", envvar="INPUT_EMAIL-READERS", is_flag=True, help="Email readers about the new publish.")
-@click.option("--release_notes", envvar="INPUT_RELEASE-NOTES", default=None, help="Release notes for the publish.")
-@click.option("--check_status", envvar="INPUT_CHECK-STATUS", is_flag=True, help="Check the job status of a Preview or Publish on Leanpub.")
+@click.option(
+    "--preview", envvar="INPUT_PREVIEW", is_flag=True, help="Preview a book on Leanpub."
+)
+@click.option(
+    "--publish", envvar="INPUT_PUBLISH", is_flag=True, help="Publish a book on Leanpub."
+)
+@click.option(
+    "--email_readers",
+    envvar="INPUT_EMAIL-READERS",
+    is_flag=True,
+    help="Email readers about the new publish.",
+)
+@click.option(
+    "--release_notes",
+    envvar="INPUT_RELEASE-NOTES",
+    default=None,
+    help="Release notes for the publish.",
+)
+@click.option(
+    "--check_status",
+    envvar="INPUT_CHECK-STATUS",
+    is_flag=True,
+    help="Check the job status of a Preview or Publish on Leanpub.",
+)
 def main(
-    leanpub_api_key: str = None,
-    book_slug: str = None,
+    leanpub_api_key: Optional[str] = None,
+    book_slug: Optional[str] = None,
     preview: bool = False,
     publish: bool = False,
     email_readers: bool = False,
-    release_notes: str = None,
+    release_notes: Optional[str] = None,
     check_status: bool = False,
-) -> int:
+) -> None:
     """Entrypoint into our script.
 
     Publish, Preview, or Check Status on an existing Publish/Preview job.
@@ -83,7 +103,7 @@ def main(
         if err is not None:
             print(err)
             exit_code = 1
-        elif resp.status_code == 200:
+        elif resp is not None and resp.status_code == 200:
             print(f"Preview job started at {datetime.datetime.utcnow()}")
         else:
             print("Unknown error has occurred!")
@@ -92,11 +112,15 @@ def main(
     # Check if we are publishing
     if publish:
         print(f"Publishing '{book_slug}'")
-        resp, err = leanpub.publish(book_slug=book_slug, email_readers=email_readers, release_notes=release_notes)
+        resp, err = leanpub.publish(
+            book_slug=book_slug,
+            email_readers=email_readers,
+            release_notes=release_notes,
+        )
         if err is not None:
             print(err)
             exit_code = 1
-        elif resp.status_code == 200:
+        elif resp is not None and resp.status_code == 200:
             print(f"Publish job started at {datetime.datetime.utcnow()}")
         else:
             print("Unknown error has occurred!")
@@ -109,7 +133,7 @@ def main(
         if err is not None:
             print(err)
             exit_code = 1
-        elif resp.status_code == 200:
+        elif resp is not None and resp.status_code == 200:
             status = resp.json()
             print(f"Status: {status}")
         else:
