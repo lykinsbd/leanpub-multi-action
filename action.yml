@@ -9,29 +9,18 @@ inputs:
   leanpub-book-slug:
     description: "Leanpub Book Slug"
     required: true
-  preview:
-    description: "Start a Preview job"
-    required: false
-    default: false
-  publish:
-    description: "Publish the book"
-    required: false
-    default: false
+  action:
+    description: "Action to perform: preview, publish, or check-status"
+    required: true
   email-readers:
-    description: "Email readers about the new publish"
+    description: "Email readers about the new publish (publish only)"
     required: false
-    default: false
+    default: "false"
   release-notes:
-    description: "Release notes for the publish"
+    description: "Release notes for the publish (publish only)"
     required: false
-  check-status:
-    description: "Check the job status of a Preview or Publish"
-    required: false
-    default: false
 runs:
   using: "docker"
   image: "docker://ghcr.io/lykinsbd/leanpub-multi-action:latest"
-  # args:
-  #   - "${{ inputs.leanpub-api-key }}"
-  #   - "${{ inputs.leanpub-book-slug }}"
-  #   - "${{ inputs.preview }}"
+  args:
+    - "${{ inputs.action }}"
