@@ -1,4 +1,5 @@
 """Tasks for use with Invoke."""
+
 import os
 import pathlib
 import sys
@@ -9,7 +10,9 @@ from invoke import task
 try:
     import toml
 except ImportError:
-    sys.exit("Please make sure to `pip install toml` or enable the virtual environment.")
+    sys.exit(
+        "Please make sure to `pip install toml` or enable the virtual environment."
+    )
 
 
 PYPROJECT_CONFIG = toml.load("pyproject.toml")
@@ -30,7 +33,13 @@ LEANPUB_BOOK_SLUG = os.getenv("LEANPUB_BOOK_SLUG", "test_book_slug")
 PWD = os.getcwd()
 
 
-def run_cmd(context, exec_cmd, pty=True, hide=False, error_message="An unknown error has occurred!"):
+def run_cmd(
+    context,
+    exec_cmd,
+    pty=True,
+    hide=False,
+    error_message="An unknown error has occurred!",
+):
     """Wrapper to run the invoke task commands.
 
     Args:
@@ -216,7 +225,9 @@ def pre_release(context, patch=False, minor=False, major=False):
 
     # Check if more than one type was specified (or none)
     if not patch and not minor and not major:
-        raise invoke.exceptions.Exit("You must specify a patch/minor/major version bump!")
+        raise invoke.exceptions.Exit(
+            "You must specify a patch/minor/major version bump!"
+        )
     if patch and (minor or major):
         raise invoke.exceptions.Exit("You must only specify ONE of patch/minor/major!")
     if minor and (patch or major):
@@ -255,12 +266,16 @@ def pre_release(context, patch=False, minor=False, major=False):
         parts[2] = "0"
     new_image_ver = ".".join(parts)
 
-    print(f"Starting pre-release actions to perform a {bump_type} version bump on {IMAGE_NAME}:{IMAGE_VER}")
+    print(
+        f"Starting pre-release actions to perform a {bump_type} version bump on {IMAGE_NAME}:{IMAGE_VER}"
+    )
 
     # Update version in pyproject.toml
     pyproject = pathlib.Path("pyproject.toml")
     pyproject.write_text(
-        pyproject.read_text(encoding="utf8").replace(f'version = "{current_ver}"', f'version = "{new_image_ver}"'),
+        pyproject.read_text(encoding="utf8").replace(
+            f'version = "{current_ver}"', f'version = "{new_image_ver}"'
+        ),
         encoding="utf8",
     )
     print(f"Project now at {IMAGE_NAME}:{new_image_ver}")
@@ -269,7 +284,9 @@ def pre_release(context, patch=False, minor=False, major=False):
     changelog = pathlib.Path("CHANGELOG.rst")
     current_changelog = changelog.read_text(encoding="utf8")
     changelog.write_text(
-        pathlib.Path(PYPROJECT_CONFIG["tool"]["towncrier"]["filename"]).read_text(encoding="utf8")
+        pathlib.Path(PYPROJECT_CONFIG["tool"]["towncrier"]["filename"]).read_text(
+            encoding="utf8"
+        )
         + "\n\n"
         + current_changelog,
         encoding="utf8",
@@ -285,7 +302,10 @@ def pre_release(context, patch=False, minor=False, major=False):
 
     print("Updating example in README.md")
     readme = pathlib.Path("README.md")
-    readme.write_text(readme.read_text(encoding="utf8").replace(f"v{IMAGE_VER}", f"v{new_image_ver}"), encoding="utf8")
+    readme.write_text(
+        readme.read_text(encoding="utf8").replace(f"v{IMAGE_VER}", f"v{new_image_ver}"),
+        encoding="utf8",
+    )
 
     print("Committing the changes and pushing to origin.")
     run_cmd(
@@ -295,7 +315,12 @@ def pre_release(context, patch=False, minor=False, major=False):
         error_message="Unable to stage and commit changes!",
     )
 
-    run_cmd(context, exec_cmd="git push", pty=False, error_message="Unable to push committed changes!")
+    run_cmd(
+        context,
+        exec_cmd="git push",
+        pty=False,
+        error_message="Unable to push committed changes!",
+    )
 
     print(
         "\nNOTE - To finish the release process you will need to:\n"
@@ -308,12 +333,30 @@ def pre_release(context, patch=False, minor=False, major=False):
 def release(context):
     """Start a Release on GitHub."""
     print(f"Starting a release of v{IMAGE_VER} on GitHub!")
-    run_cmd(context, exec_cmd="git checkout main", pty=False, error_message="Failed to checkout main!")
-
-    run_cmd(context, exec_cmd="git pull origin main", pty=False, error_message="Failed to pull from origin/main")
-
     run_cmd(
-        context, exec_cmd=f"git tag v{IMAGE_VER}", pty=False, error_message=f"Failed to create the tag 'v{IMAGE_VER}'!"
+        context,
+        exec_cmd="git checkout main",
+        pty=False,
+        error_message="Failed to checkout main!",
     )
 
-    run_cmd(context, exec_cmd="git push --tags", pty=False, error_message=f"Failed to push the tag 'v{IMAGE_VER}'!")
+    run_cmd(
+        context,
+        exec_cmd="git pull origin main",
+        pty=False,
+        error_message="Failed to pull from origin/main",
+    )
+
+    run_cmd(
+        context,
+        exec_cmd=f"git tag v{IMAGE_VER}",
+        pty=False,
+        error_message=f"Failed to create the tag 'v{IMAGE_VER}'!",
+    )
+
+    run_cmd(
+        context,
+        exec_cmd="git push --tags",
+        pty=False,
+        error_message=f"Failed to push the tag 'v{IMAGE_VER}'!",
+    )
