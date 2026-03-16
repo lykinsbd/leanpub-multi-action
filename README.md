@@ -112,6 +112,12 @@ The output PDF is saved as `{slug}-single-file.pdf` in your Dropbox previews fol
 The action also ships as a standalone CLI tool called `lma`.
 
 ```bash
+uv tool install leanpub-multi-action
+```
+
+or with pip:
+
+```bash
 pip install leanpub-multi-action
 ```
 
