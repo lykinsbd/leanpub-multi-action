@@ -120,12 +120,12 @@ def main(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     if preview:
         print(f"Generating a Preview of '{book_slug}'")
         resp, err = leanpub.preview(book_slug=book_slug)
-        exit_code = _handle_response(resp, err, f"Preview job started at {datetime.datetime.utcnow()}")
+        exit_code = _handle_response(resp, err, f"Preview job started at {datetime.datetime.now(datetime.UTC)}")
 
     if publish:
         print(f"Publishing '{book_slug}'")
         resp, err = leanpub.publish(book_slug=book_slug, email_readers=email_readers, release_notes=release_notes)
-        exit_code = _handle_response(resp, err, f"Publish job started at {datetime.datetime.utcnow()}")
+        exit_code = _handle_response(resp, err, f"Publish job started at {datetime.datetime.now(datetime.UTC)}")
 
     if check_status:
         print(f"Checking status of '{book_slug}'")

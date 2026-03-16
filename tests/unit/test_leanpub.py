@@ -14,6 +14,8 @@ def _client():
 
 
 class TestPreview:
+    """Test the preview API call."""
+
     def test_success(self):
         client = _client()
         with rm.Mocker() as m:
@@ -21,6 +23,7 @@ class TestPreview:
             resp, err = client.preview(SLUG)
         assert err is None
         assert resp.status_code == 200
+        assert resp.request.body == f'{{"api_key": "{API_KEY}"}}'.encode()
 
     def test_http_error(self):
         client = _client()
@@ -32,6 +35,8 @@ class TestPreview:
 
 
 class TestPublish:
+    """Test the publish API call."""
+
     def test_success(self):
         client = _client()
         with rm.Mocker() as m:
@@ -39,6 +44,8 @@ class TestPublish:
             resp, err = client.publish(SLUG)
         assert err is None
         assert resp.status_code == 200
+        assert f"api_key={API_KEY}" in resp.request.body
+        assert "publish%5Bemail_readers%5D=False" in resp.request.body
 
     def test_with_options(self):
         client = _client()
@@ -46,9 +53,8 @@ class TestPublish:
             m.post(f"https://leanpub.com/{SLUG}/publish.json", status_code=200)
             resp, err = client.publish(SLUG, email_readers=True, release_notes="v2.0")
         assert err is None
-        body = resp.request.body
-        assert "publish%5Bemail_readers%5D=True" in body
-        assert "publish%5Brelease_notes%5D=v2.0" in body
+        assert "publish%5Bemail_readers%5D=True" in resp.request.body
+        assert "publish%5Brelease_notes%5D=v2.0" in resp.request.body
 
     def test_http_error(self):
         client = _client()
@@ -60,13 +66,20 @@ class TestPublish:
 
 
 class TestCheckStatus:
+    """Test the check_status API call."""
+
     def test_success(self):
         client = _client()
         with rm.Mocker() as m:
-            m.get(f"https://leanpub.com/{SLUG}/book_status.json", json={"status": "working"}, status_code=200)
+            m.get(
+                f"https://leanpub.com/{SLUG}/book_status.json",
+                json={"status": "working"},
+                status_code=200,
+            )
             resp, err = client.check_status(SLUG)
         assert err is None
         assert resp.json() == {"status": "working"}
+        assert f"api_key={API_KEY}" in resp.request.url
 
     def test_http_error(self):
         client = _client()
