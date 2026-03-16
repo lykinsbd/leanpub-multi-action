@@ -12,7 +12,7 @@ name: "Test Runner"
   workflow_dispatch: null
 
 jobs:
-  black:
+  ruff:
     runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
@@ -21,60 +21,8 @@ jobs:
         uses: "actions/checkout@v4"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
-      - name: "Linting: black"
-        run: "uv run invoke black"
-  isort:
-    runs-on: "ubuntu-latest"
-    env:
-      INVOKE_LOCAL: "True"
-    steps:
-      - name: "Check out repository code"
-        uses: "actions/checkout@v4"
-      - name: "Setup environment"
-        uses: "./.github/actions/setup-environment"
-      - name: "Linting: isort"
-        run: "uv run invoke isort"
-    needs:
-      - "black"
-  bandit:
-    runs-on: "ubuntu-latest"
-    env:
-      INVOKE_LOCAL: "True"
-    steps:
-      - name: "Check out repository code"
-        uses: "actions/checkout@v4"
-      - name: "Setup environment"
-        uses: "./.github/actions/setup-environment"
-      - name: "Linting: bandit"
-        run: "uv run invoke bandit"
-    needs:
-      - "black"
-  pydocstyle:
-    runs-on: "ubuntu-latest"
-    env:
-      INVOKE_LOCAL: "True"
-    steps:
-      - name: "Check out repository code"
-        uses: "actions/checkout@v4"
-      - name: "Setup environment"
-        uses: "./.github/actions/setup-environment"
-      - name: "Linting: pydocstyle"
-        run: "uv run invoke pydocstyle"
-    needs:
-      - "black"
-  flake8:
-    runs-on: "ubuntu-latest"
-    env:
-      INVOKE_LOCAL: "True"
-    steps:
-      - name: "Check out repository code"
-        uses: "actions/checkout@v4"
-      - name: "Setup environment"
-        uses: "./.github/actions/setup-environment"
-      - name: "Linting: flake8"
-        run: "uv run invoke flake8"
-    needs:
-      - "black"
+      - name: "Linting: ruff"
+        run: "uv run invoke ruff"
   yamllint:
     runs-on: "ubuntu-latest"
     env:
@@ -86,8 +34,6 @@ jobs:
         uses: "./.github/actions/setup-environment"
       - name: "Linting: yamllint"
         run: "uv run invoke yamllint"
-    needs:
-      - "black"
   pylint:
     runs-on: "ubuntu-latest"
     env:
@@ -99,8 +45,6 @@ jobs:
         uses: "./.github/actions/setup-environment"
       - name: "Linting: Pylint"
         run: "uv run invoke pylint"
-    needs:
-      - "black"
   pytest:
     strategy:
       fail-fast: true
@@ -114,8 +58,6 @@ jobs:
         uses: "./.github/actions/setup-environment"
       - name: "Run Tests"
         run: "uv run invoke pytest"
-    needs:
-      - "black"
   build:
     runs-on: "ubuntu-latest"
     steps:
@@ -126,10 +68,7 @@ jobs:
       - name: "Test building the Python package and Docker container"
         run: "uv run invoke build"
     needs:
-      - "isort"
-      - "bandit"
-      - "pydocstyle"
-      - "flake8"
+      - "ruff"
       - "yamllint"
       - "pylint"
       - "pytest"
