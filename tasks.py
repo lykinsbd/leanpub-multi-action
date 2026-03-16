@@ -129,7 +129,7 @@ def ruff(context):
 @task
 def pylint(context):
     """Run pylint code analysis."""
-    exec_cmd = 'find . -name "*.py" | xargs pylint'
+    exec_cmd = 'find . -path ./.venv -prune -o -name "*.py" -print | xargs pylint'
     run_cmd(context, exec_cmd)
 
 
