@@ -136,7 +136,7 @@ def pylint(context):
 @task
 def yamllint(context):
     """Run yamllint to validate formatting adheres to NTC defined YAML standards."""
-    exec_cmd = "yamllint ."
+    exec_cmd = "yamllint .github/ .pre-commit-config.yaml action.yml"
     run_cmd(context, exec_cmd)
 
 
