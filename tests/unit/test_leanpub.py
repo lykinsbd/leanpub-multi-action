@@ -25,11 +25,43 @@ class TestPreview:
         assert resp.status_code == 200
         assert resp.request.body == f'{{"api_key": "{API_KEY}"}}'.encode()
 
+    def test_subset(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.post(f"https://leanpub.com/{SLUG}/preview/subset.json", status_code=200)
+            resp, err = client.preview(SLUG, subset=True)
+        assert err is None
+        assert resp.status_code == 200
+        assert "subset" in resp.request.url
+
     def test_http_error(self):
         client = _client()
         with rm.Mocker() as m:
             m.post(f"https://leanpub.com/{SLUG}/preview.json", status_code=500)
             resp, err = client.preview(SLUG)
+        assert resp is None
+        assert isinstance(err, requests.RequestException)
+
+
+class TestPreviewSingle:
+    """Test the single file preview API call."""
+
+    def test_success(self):
+        client = _client()
+        content = "# Chapter 1\n\nHello world."
+        with rm.Mocker() as m:
+            m.post(f"https://leanpub.com/{SLUG}/preview/single.json", status_code=200)
+            resp, err = client.preview_single(SLUG, content=content)
+        assert err is None
+        assert resp.status_code == 200
+        assert resp.request.body == content.encode()
+        assert f"api_key={API_KEY}" in resp.request.url
+
+    def test_http_error(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.post(f"https://leanpub.com/{SLUG}/preview/single.json", status_code=500)
+            resp, err = client.preview_single(SLUG, content="test")
         assert resp is None
         assert isinstance(err, requests.RequestException)
 

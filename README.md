@@ -1,49 +1,50 @@
-# Leanpub multi-action
+# Leanpub Multi Action
 
-Interact with Leanpub via GitHub Actions
+[![CI](https://github.com/lykinsbd/leanpub-multi-action/actions/workflows/tests.yml/badge.svg?branch=dev)](https://github.com/lykinsbd/leanpub-multi-action/actions/workflows/tests.yml)
+
+A GitHub Action to interact with the [Leanpub API](https://leanpub.com/help/api).
+Preview, publish, and check job status for your Leanpub books — directly from your GitHub workflows.
+
+## Quick Start
+
+```yaml
+- name: "Preview Book"
+  uses: "lykinsbd/leanpub-multi-action@v2"
+  with:
+    leanpub-api-key: "${{ secrets.LEANPUB_API_KEY }}"
+    leanpub-book-slug: "mygreatbook"
+    action: "preview"
+```
 
 ## Inputs
 
-### `leanpub-api-key`
+| Name | Required | Default | Description |
+|------|----------|---------|-------------|
+| `leanpub-api-key` | Yes | — | Leanpub API key (requires a [Pro plan](https://leanpub.com/help/api)). Store as a [GitHub Secret](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions). |
+| `leanpub-book-slug` | Yes | — | Book slug — the path component after `https://leanpub.com/`. |
+| `action` | Yes | — | Action to perform: `preview`, `publish`, or `check-status`. |
+| `email-readers` | No | `"false"` | Email readers about a new publish. Only used with `publish`. |
+| `release-notes` | No | — | Release notes for the publish. Only used with `publish`. |
+| `subset` | No | `"false"` | Preview only the files listed in `Subset.txt`. Only used with `preview`. |
+| `single-file` | No | — | Path to a Markdown file for single-file preview. Only used with `preview`. |
 
-**Required** The Leanpub API key for your account, which requires a "Pro" plan on Leanpub.com.
-Recommended to place this in a GitHub Secret named `LEANPUB_API_KEY`.
+## Examples
 
-### `leanpub-book-slug`
+### Full preview on push
 
-**Required** The "slugified" name of your book, i.e. "mygreatbook" for "My Great Book".
-Per Leanpub's [API documentation](https://leanpub.com/help/api), it is "the part of the URL for your book after `https://leanpub.com/"`.
-
-### `action`
-
-**Required** The action to perform. One of: `preview`, `publish`, or `check-status`.
-
-### `email-readers`
-
-Boolean, set to `"true"` to email readers about a new publish. Only used with `action: publish`.
-
-### `release-notes`
-
-Release notes for the publish. Only used with `action: publish`.
-
-## Example Usage
-
-Below is an example workflow file:
-
-```YAML
+```yaml
 ---
-name: "Push to Preview"
+name: "Preview on Push"
 
 "on":
   push:
     branches: ["preview"]
-  workflow_dispatch: null
 
 jobs:
-  preview_build:
+  preview:
     runs-on: "ubuntu-latest"
     steps:
-      - name: "Preview Build"
+      - name: "Preview Book"
         uses: "lykinsbd/leanpub-multi-action@v2"
         with:
           leanpub-api-key: "${{ secrets.LEANPUB_API_KEY }}"
@@ -51,9 +52,40 @@ jobs:
           action: "preview"
 ```
 
+### Subset preview
+
+Preview only the files listed in your book's `Subset.txt`:
+
+```yaml
+- name: "Subset Preview"
+  uses: "lykinsbd/leanpub-multi-action@v2"
+  with:
+    leanpub-api-key: "${{ secrets.LEANPUB_API_KEY }}"
+    leanpub-book-slug: "mygreatbook"
+    action: "preview"
+    subset: "true"
+```
+
+### Single-file preview
+
+Preview a single Markdown file without modifying `Subset.txt`.
+The output PDF is saved as `{slug}-single-file.pdf` in your Dropbox previews folder.
+
+```yaml
+- name: "Checkout"
+  uses: "actions/checkout@v4"
+- name: "Single File Preview"
+  uses: "lykinsbd/leanpub-multi-action@v2"
+  with:
+    leanpub-api-key: "${{ secrets.LEANPUB_API_KEY }}"
+    leanpub-book-slug: "mygreatbook"
+    action: "preview"
+    single-file: "manuscript/chapter-05.md"
+```
+
 ### Publish with release notes
 
-```YAML
+```yaml
 - name: "Publish"
   uses: "lykinsbd/leanpub-multi-action@v2"
   with:
@@ -64,10 +96,37 @@ jobs:
     release-notes: "Chapter 5 added"
 ```
 
-### CLI Usage
+### Check job status
+
+```yaml
+- name: "Check Status"
+  uses: "lykinsbd/leanpub-multi-action@v2"
+  with:
+    leanpub-api-key: "${{ secrets.LEANPUB_API_KEY }}"
+    leanpub-book-slug: "mygreatbook"
+    action: "check-status"
+```
+
+## CLI Usage
+
+The action also ships as a standalone CLI tool called `lma`.
+
+```bash
+pip install leanpub-multi-action
+```
 
 ```bash
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook preview
+lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook preview --subset
+lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook preview --single-file chapter.md
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook publish --email-readers --release-notes "v2"
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook check-status
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+
+## License
+
+[MIT](LICENSE)

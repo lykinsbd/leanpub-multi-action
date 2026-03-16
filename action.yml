@@ -19,6 +19,13 @@ inputs:
   release-notes:
     description: "Release notes for the publish (publish only)"
     required: false
+  subset:
+    description: "Preview only the Subset.txt files (preview only)"
+    required: false
+    default: "false"
+  single-file:
+    description: "Path to a Markdown file for single file preview (preview only)"
+    required: false
 runs:
   using: "docker"
   image: "docker://ghcr.io/lykinsbd/leanpub-multi-action:latest"
