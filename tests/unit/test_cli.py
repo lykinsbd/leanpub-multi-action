@@ -46,8 +46,32 @@ class TestPreviewCLI:
         mock_resp = MagicMock(status_code=200)
         mock_cls.return_value.preview.return_value = (mock_resp, None)
         result = _invoke(*_base("preview"))
+        mock_cls.return_value.preview.assert_called_once_with(book_slug=SLUG, subset=False)
         assert result.exit_code == 0
         assert "Preview job started" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_subset(self, mock_cls):
+        mock_resp = MagicMock(status_code=200)
+        mock_cls.return_value.preview.return_value = (mock_resp, None)
+        result = _invoke(*_base("preview", "--subset"))
+        mock_cls.return_value.preview.assert_called_once_with(book_slug=SLUG, subset=True)
+        assert result.exit_code == 0
+        assert "Subset Preview job started" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_single_file(self, mock_cls, tmp_path):
+        md_file = tmp_path / "chapter.md"
+        md_file.write_text("# Test\n\nContent.")
+        mock_resp = MagicMock(status_code=200)
+        mock_cls.return_value.preview_single.return_value = (mock_resp, None)
+        result = _invoke(*_base("preview", "--single-file", str(md_file)))
+        mock_cls.return_value.preview_single.assert_called_once_with(
+            book_slug=SLUG,
+            content="# Test\n\nContent.",
+        )
+        assert result.exit_code == 0
+        assert "Single file preview job started" in result.output
 
     @patch("leanpub_multi_action.cli.Leanpub")
     def test_error(self, mock_cls):

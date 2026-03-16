@@ -1,6 +1,7 @@
 """Leanpub Actions for GitHub Actions Workflows."""
 
 import datetime
+import pathlib
 import sys
 
 import click
@@ -57,13 +58,31 @@ def main(ctx: click.Context, leanpub_api_key: str, book_slug: str) -> None:
 
 
 @main.command()
+@click.option("--subset", envvar="INPUT_SUBSET", is_flag=True, help="Preview only the Subset.txt files.")
+@click.option(
+    "--single-file",
+    envvar="INPUT_SINGLE-FILE",
+    type=click.Path(exists=True),
+    default=None,
+    help="Path to a Markdown file to preview.",
+)
 @click.pass_context
-def preview(ctx: click.Context) -> None:
+def preview(ctx: click.Context, subset: bool, single_file: str | None) -> None:
     """Generate a preview of the book."""
     book_slug = ctx.obj["book_slug"]
-    print(f"Generating a Preview of '{book_slug}'")
-    resp, err = ctx.obj["client"].preview(book_slug=book_slug)
-    sys.exit(_handle_response(resp, err, f"Preview job started at {datetime.datetime.now(datetime.UTC)}"))
+    client = ctx.obj["client"]
+    now = datetime.datetime.now(datetime.UTC)
+
+    if single_file:
+        content = pathlib.Path(single_file).read_text(encoding="utf-8")
+        print(f"Generating a Single File Preview of '{book_slug}' from '{single_file}'")
+        resp, err = client.preview_single(book_slug=book_slug, content=content)
+        sys.exit(_handle_response(resp, err, f"Single file preview job started at {now}"))
+
+    kind = "Subset Preview" if subset else "Preview"
+    print(f"Generating a {kind} of '{book_slug}'")
+    resp, err = client.preview(book_slug=book_slug, subset=subset)
+    sys.exit(_handle_response(resp, err, f"{kind} job started at {now}"))
 
 
 @main.command()

@@ -27,17 +27,46 @@ class Leanpub(requests.Session):
         self.leanpub_api_key = leanpub_api_key
         self.leanpub_url = "https://leanpub.com/"
 
-    def preview(self, book_slug: str) -> tuple[requests.Response | None, requests.RequestException | None]:
+    def preview(
+        self,
+        book_slug: str,
+        subset: bool = False,
+    ) -> tuple[requests.Response | None, requests.RequestException | None]:
         """Request a Preview be built of the book_slug provided.
 
         Args:
             book_slug (str): book_slug to generate a Preview of
+            subset (bool): If True, preview only the Subset.txt files
 
         """
-        url = f"{self.leanpub_url}{book_slug}/preview.json"
+        path = f"{book_slug}/preview/subset.json" if subset else f"{book_slug}/preview.json"
+        url = f"{self.leanpub_url}{path}"
         payload = {"api_key": self.leanpub_api_key}
         try:
             resp = self.post(url=url, json=payload)
+            resp.raise_for_status()
+        except requests.RequestException as exception:
+            return None, exception
+
+        return resp, None
+
+    def preview_single(
+        self,
+        book_slug: str,
+        content: str,
+    ) -> tuple[requests.Response | None, requests.RequestException | None]:
+        """Preview a single file of Markdown content.
+
+        Args:
+            book_slug (str): book_slug to generate a Preview for
+            content (str): Markdown content to preview
+
+        """
+        url = f"{self.leanpub_url}{book_slug}/preview/single.json"
+        params = {"api_key": self.leanpub_api_key}
+        headers = {"Content-Type": "text/plain"}
+        try:
+            resp = self.post(url=url, params=params, data=content.encode(), headers=headers)
             resp.raise_for_status()
         except requests.RequestException as exception:
             return None, exception
