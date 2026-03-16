@@ -17,7 +17,7 @@ PYPROJECT_CONFIG = toml.load("pyproject.toml")
 PROJECT_CONFIG = PYPROJECT_CONFIG["project"]
 
 # Can be set to a separate Python version to be used for launching or building image
-INVOKE_PYTHON_VER = os.getenv("INVOKE_PYTHON_VER", "3.9")
+INVOKE_PYTHON_VER = os.getenv("INVOKE_PYTHON_VER", "3.13")
 # Name of the docker image/image
 IMAGE_NAME = os.getenv("IMAGE_NAME", PROJECT_CONFIG["name"])
 # Tag for the image

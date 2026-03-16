@@ -3,7 +3,7 @@ name = "leanpub-multi-action"
 version = "1.0.2"
 description = "GitHub Actions for Leanpub.com"
 authors = [{name = "Brett Lykins", email = "lykinsbd@gmail.com"}]
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 dependencies = [
     "requests>=2",
     "click>=8",
@@ -34,7 +34,7 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "D", "S"]
@@ -54,6 +54,9 @@ no-docstring-rgx="^(_|test_|Meta$)"
 # Line length is enforced by ruff, so pylint doesn't need to check it.
 disable = """,
     line-too-long,
+    too-many-arguments,
+    too-many-positional-arguments,
+    too-many-branches,
     """
 
 [tool.pylint.miscellaneous]
