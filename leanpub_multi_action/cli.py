@@ -4,8 +4,35 @@ import datetime
 import sys
 
 import click
+import requests
 
 from leanpub_multi_action.leanpub import Leanpub
+
+
+def _handle_response(
+    resp: requests.Response | None,
+    err: requests.RequestException | None,
+    success_msg: str,
+) -> int:
+    """Handle a Leanpub API response and return an exit code.
+
+    Args:
+        resp: The API response, if successful.
+        err: The exception, if the request failed.
+        success_msg: Message to print on success.
+
+    Returns:
+        Exit code: 0 for success, 1 for failure.
+
+    """
+    if err is not None:
+        print(err)
+        return 1
+    if resp is not None and resp.status_code == 200:
+        print(success_msg)
+        return 0
+    print("Unknown error has occurred!")
+    return 1
 
 
 @click.command()
@@ -42,7 +69,7 @@ from leanpub_multi_action.leanpub import Leanpub
     is_flag=True,
     help="Check the job status of a Preview or Publish on Leanpub.",
 )
-def main(
+def main(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     leanpub_api_key: str | None = None,
     book_slug: str | None = None,
     preview: bool = False,
@@ -54,6 +81,8 @@ def main(
     """Entrypoint into our script.
 
     Publish, Preview, or Check Status on an existing Publish/Preview job.
+
+    See #61 for planned refactor to Click subcommands.
 
     Args:
         leanpub_api_key (str): API Key for the Leanpub API.
@@ -71,62 +100,33 @@ def main(
         int: exit_code as an integer to return to OS
 
     """
-    exit_code = 0
-
-    # Attempt to find API Key
     if not leanpub_api_key:
         print("No Leanpub API Key Found!")
         sys.exit(1)
 
-    # Attempt to find Book Slug
     if not book_slug:
         print("No Leanpub Book Slug Found!")
         sys.exit(1)
 
     print("Leanpub API Key and Book Slug found")
 
-    # We need to be doing one of the three possible actions
     if not publish and not preview and not check_status:
         print("Must either Publish, Preview, or Check Status!")
         sys.exit(1)
 
-    err = None
+    leanpub = Leanpub(leanpub_api_key=leanpub_api_key)
     exit_code = 0
 
-    # Instantiate the Leanpub client
-    leanpub = Leanpub(leanpub_api_key=leanpub_api_key)
-
-    # Check if we are previewing
     if preview:
         print(f"Generating a Preview of '{book_slug}'")
         resp, err = leanpub.preview(book_slug=book_slug)
-        if err is not None:
-            print(err)
-            exit_code = 1
-        elif resp is not None and resp.status_code == 200:
-            print(f"Preview job started at {datetime.datetime.utcnow()}")
-        else:
-            print("Unknown error has occurred!")
-            exit_code = 1
+        exit_code = _handle_response(resp, err, f"Preview job started at {datetime.datetime.utcnow()}")
 
-    # Check if we are publishing
     if publish:
         print(f"Publishing '{book_slug}'")
-        resp, err = leanpub.publish(
-            book_slug=book_slug,
-            email_readers=email_readers,
-            release_notes=release_notes,
-        )
-        if err is not None:
-            print(err)
-            exit_code = 1
-        elif resp is not None and resp.status_code == 200:
-            print(f"Publish job started at {datetime.datetime.utcnow()}")
-        else:
-            print("Unknown error has occurred!")
-            exit_code = 1
+        resp, err = leanpub.publish(book_slug=book_slug, email_readers=email_readers, release_notes=release_notes)
+        exit_code = _handle_response(resp, err, f"Publish job started at {datetime.datetime.utcnow()}")
 
-    # Check if we are checking :lulz:
     if check_status:
         print(f"Checking status of '{book_slug}'")
         resp, err = leanpub.check_status(book_slug=book_slug)
@@ -134,8 +134,7 @@ def main(
             print(err)
             exit_code = 1
         elif resp is not None and resp.status_code == 200:
-            status = resp.json()
-            print(f"Status: {status}")
+            print(f"Status: {resp.json()}")
         else:
             print("Unknown error has occurred!")
             exit_code = 1
