@@ -2,6 +2,9 @@
 # action.yml
 name: "Leanpub Multi Action"
 description: "Interact with Leanpub.com via GitHub Actions."
+branding:
+  icon: "book-open"
+  color: "yellow"
 inputs:
   leanpub-api-key:
     description: "Leanpub API Key"
