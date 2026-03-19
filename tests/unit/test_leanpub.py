@@ -105,13 +105,25 @@ class TestCheckStatus:
         with rm.Mocker() as m:
             m.get(
                 f"https://leanpub.com/{SLUG}/job_status.json",
-                json={"status": "working"},
+                json={"status": "working", "job_type": "GenerateBookJob#preview", "num": 5, "total": 28},
                 status_code=200,
             )
             resp, err = client.check_status(SLUG)
         assert err is None
-        assert resp.json() == {"status": "working"}
+        assert resp.json()["status"] == "working"
         assert f"api_key={API_KEY}" in resp.request.url
+
+    def test_no_job_running(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(
+                f"https://leanpub.com/{SLUG}/job_status.json",
+                json={},
+                status_code=200,
+            )
+            resp, err = client.check_status(SLUG)
+        assert err is None
+        assert resp.json() == {}
 
     def test_http_error(self):
         client = _client()
