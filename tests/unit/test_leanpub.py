@@ -97,6 +97,89 @@ class TestPublish:
         assert isinstance(err, requests.RequestException)
 
 
+class TestBookSummary:
+    """Test the book_summary API call."""
+
+    def test_success(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(
+                f"https://leanpub.com/{SLUG}.json",
+                json={"slug": SLUG, "title": "My Book", "total_copies_sold": 42},
+                status_code=200,
+            )
+            resp, err = client.book_summary(SLUG)
+        assert err is None
+        assert resp.json()["slug"] == SLUG
+        assert f"api_key={API_KEY}" in resp.request.url
+
+    def test_http_error(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(f"https://leanpub.com/{SLUG}.json", status_code=404)
+            resp, err = client.book_summary(SLUG)
+        assert resp is None
+        assert isinstance(err, requests.RequestException)
+
+
+class TestBookExists:
+    """Test the book_exists API call."""
+
+    def test_exists(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(
+                f"https://leanpub.com/{SLUG}/exists.json",
+                json={"exists": True, "state": "published"},
+                status_code=200,
+            )
+            resp, err = client.book_exists(SLUG)
+        assert err is None
+        assert resp.json()["exists"] is True
+        assert f"api_key={API_KEY}" in resp.request.url
+
+    def test_not_exists(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(
+                f"https://leanpub.com/{SLUG}/exists.json",
+                json={"exists": False},
+                status_code=200,
+            )
+            resp, err = client.book_exists(SLUG)
+        assert err is None
+        assert resp.json()["exists"] is False
+
+    def test_http_error(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(f"https://leanpub.com/{SLUG}/exists.json", status_code=401)
+            resp, err = client.book_exists(SLUG)
+        assert resp is None
+        assert isinstance(err, requests.RequestException)
+
+
+class TestUnpublish:
+    """Test the unpublish API call."""
+
+    def test_success(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.post(f"https://leanpub.com/{SLUG}/unpublish.json", status_code=200)
+            resp, err = client.unpublish(SLUG)
+        assert err is None
+        assert resp.status_code == 200
+        assert f"api_key={API_KEY}" in resp.request.body
+
+    def test_http_error(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.post(f"https://leanpub.com/{SLUG}/unpublish.json", status_code=403)
+            resp, err = client.unpublish(SLUG)
+        assert resp is None
+        assert isinstance(err, requests.RequestException)
+
+
 class TestCheckStatus:
     """Test the check_status API call."""
 
@@ -104,19 +187,31 @@ class TestCheckStatus:
         client = _client()
         with rm.Mocker() as m:
             m.get(
-                f"https://leanpub.com/{SLUG}/book_status.json",
-                json={"status": "working"},
+                f"https://leanpub.com/{SLUG}/job_status.json",
+                json={"status": "working", "job_type": "GenerateBookJob#preview", "num": 5, "total": 28},
                 status_code=200,
             )
             resp, err = client.check_status(SLUG)
         assert err is None
-        assert resp.json() == {"status": "working"}
+        assert resp.json()["status"] == "working"
         assert f"api_key={API_KEY}" in resp.request.url
+
+    def test_no_job_running(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(
+                f"https://leanpub.com/{SLUG}/job_status.json",
+                json={},
+                status_code=200,
+            )
+            resp, err = client.check_status(SLUG)
+        assert err is None
+        assert resp.json() == {}
 
     def test_http_error(self):
         client = _client()
         with rm.Mocker() as m:
-            m.get(f"https://leanpub.com/{SLUG}/book_status.json", status_code=404)
+            m.get(f"https://leanpub.com/{SLUG}/job_status.json", status_code=404)
             resp, err = client.check_status(SLUG)
         assert resp is None
         assert isinstance(err, requests.RequestException)

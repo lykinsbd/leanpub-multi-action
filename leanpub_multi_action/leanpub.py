@@ -102,6 +102,57 @@ class Leanpub(requests.Session):
 
         return resp, None
 
+    def book_summary(self, book_slug: str) -> tuple[requests.Response | None, requests.RequestException | None]:
+        """Get the summary/metadata for the book_slug provided.
+
+        Args:
+            book_slug (str): book_slug to get summary of
+
+        """
+        url = f"{self.leanpub_url}{book_slug}.json"
+        params = {"api_key": self.leanpub_api_key}
+        try:
+            resp = self.get(url=url, params=params)
+            resp.raise_for_status()
+        except requests.RequestException as exception:
+            return None, exception
+
+        return resp, None
+
+    def book_exists(self, book_slug: str) -> tuple[requests.Response | None, requests.RequestException | None]:
+        """Check if a book exists and get its state.
+
+        Args:
+            book_slug (str): book_slug to check
+
+        """
+        url = f"{self.leanpub_url}{book_slug}/exists.json"
+        params = {"api_key": self.leanpub_api_key}
+        try:
+            resp = self.get(url=url, params=params)
+            resp.raise_for_status()
+        except requests.RequestException as exception:
+            return None, exception
+
+        return resp, None
+
+    def unpublish(self, book_slug: str) -> tuple[requests.Response | None, requests.RequestException | None]:
+        """Unpublish the book.
+
+        Args:
+            book_slug (str): book_slug to unpublish
+
+        """
+        url = f"{self.leanpub_url}{book_slug}/unpublish.json"
+        data = {"api_key": self.leanpub_api_key}
+        try:
+            resp = self.post(url=url, data=data)
+            resp.raise_for_status()
+        except requests.RequestException as exception:
+            return None, exception
+
+        return resp, None
+
     def check_status(self, book_slug: str) -> tuple[requests.Response | None, requests.RequestException | None]:
         """Check the job status of a Preview or Publish for the book_slug provided.
 
@@ -109,7 +160,7 @@ class Leanpub(requests.Session):
             book_slug (str): book_slug to check status of
 
         """
-        url = f"{self.leanpub_url}{book_slug}/book_status.json"
+        url = f"{self.leanpub_url}{book_slug}/job_status.json"
         params = {"api_key": self.leanpub_api_key}
         try:
             resp = self.get(url=url, params=params)

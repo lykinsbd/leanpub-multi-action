@@ -129,17 +129,100 @@ class TestPublishCLI:
         assert "Publish job started" in result.output
 
 
+class TestBookSummaryCLI:
+    """Test the book-summary action path."""
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_success(self, mock_cls):
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {"slug": SLUG, "title": "My Book"}
+        mock_cls.return_value.book_summary.return_value = (mock_resp, None)
+        result = _invoke(*_base("book-summary"))
+        assert result.exit_code == 0
+        assert SLUG in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_error(self, mock_cls):
+        mock_cls.return_value.book_summary.return_value = (None, Exception("not found"))
+        result = _invoke(*_base("book-summary"))
+        assert result.exit_code == 1
+        assert "not found" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_unknown_error(self, mock_cls):
+        mock_resp = MagicMock(status_code=500)
+        mock_cls.return_value.book_summary.return_value = (mock_resp, None)
+        result = _invoke(*_base("book-summary"))
+        assert result.exit_code == 1
+        assert "Unknown error has occurred!" in result.output
+
+
+class TestBookExistsCLI:
+    """Test the book-exists action path."""
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_exists(self, mock_cls):
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {"exists": True, "state": "published"}
+        mock_cls.return_value.book_exists.return_value = (mock_resp, None)
+        result = _invoke(*_base("book-exists"))
+        assert result.exit_code == 0
+        assert "True" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_error(self, mock_cls):
+        mock_cls.return_value.book_exists.return_value = (None, Exception("unauthorized"))
+        result = _invoke(*_base("book-exists"))
+        assert result.exit_code == 1
+        assert "unauthorized" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_unknown_error(self, mock_cls):
+        mock_resp = MagicMock(status_code=500)
+        mock_cls.return_value.book_exists.return_value = (mock_resp, None)
+        result = _invoke(*_base("book-exists"))
+        assert result.exit_code == 1
+        assert "Unknown error has occurred!" in result.output
+
+
+class TestUnpublishCLI:
+    """Test the unpublish action path."""
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_success(self, mock_cls):
+        mock_resp = MagicMock(status_code=200)
+        mock_cls.return_value.unpublish.return_value = (mock_resp, None)
+        result = _invoke(*_base("unpublish"))
+        assert result.exit_code == 0
+        assert "Unpublish completed at" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_error(self, mock_cls):
+        mock_cls.return_value.unpublish.return_value = (None, Exception("forbidden"))
+        result = _invoke(*_base("unpublish"))
+        assert result.exit_code == 1
+        assert "forbidden" in result.output
+
+
 class TestCheckStatusCLI:
     """Test the check_status action path."""
 
     @patch("leanpub_multi_action.cli.Leanpub")
     def test_success(self, mock_cls):
         mock_resp = MagicMock(status_code=200)
-        mock_resp.json.return_value = {"status": "complete"}
+        mock_resp.json.return_value = {"status": "working", "job_type": "GenerateBookJob#preview"}
         mock_cls.return_value.check_status.return_value = (mock_resp, None)
         result = _invoke(*_base("check-status"))
         assert result.exit_code == 0
-        assert "complete" in result.output
+        assert "working" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_no_job_running(self, mock_cls):
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {}
+        mock_cls.return_value.check_status.return_value = (mock_resp, None)
+        result = _invoke(*_base("check-status"))
+        assert result.exit_code == 0
 
     @patch("leanpub_multi_action.cli.Leanpub")
     def test_error(self, mock_cls):
@@ -155,3 +238,38 @@ class TestCheckStatusCLI:
         result = _invoke(*_base("check-status"))
         assert result.exit_code == 1
         assert "Unknown error has occurred!" in result.output
+
+
+class TestCheckStatusWaitCLI:
+    """Test the check-status --wait polling."""
+
+    @patch("leanpub_multi_action.cli.time")
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_wait_completes(self, mock_cls, mock_time):
+        mock_time.monotonic = MagicMock(side_effect=[0, 1, 2])
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {}
+        mock_cls.return_value.check_status.return_value = (mock_resp, None)
+        result = _invoke(*_base("check-status"), "--wait", "--timeout", "10")
+        assert result.exit_code == 0
+        assert "Job complete." in result.output
+
+    @patch("leanpub_multi_action.cli.time")
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_wait_timeout(self, mock_cls, mock_time):
+        mock_time.monotonic = MagicMock(side_effect=[0, 200])
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {"status": "working"}
+        mock_cls.return_value.check_status.return_value = (mock_resp, None)
+        result = _invoke(*_base("check-status"), "--wait", "--timeout", "10")
+        assert result.exit_code == 1
+        assert "Timeout" in result.output
+
+    @patch("leanpub_multi_action.cli.time")
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_wait_error(self, mock_cls, mock_time):
+        mock_time.monotonic = MagicMock(side_effect=[0, 1])
+        mock_cls.return_value.check_status.return_value = (None, Exception("network error"))
+        result = _invoke(*_base("check-status"), "--wait", "--timeout", "10")
+        assert result.exit_code == 1
+        assert "network error" in result.output

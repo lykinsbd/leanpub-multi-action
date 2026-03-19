@@ -3,6 +3,7 @@
 import datetime
 import pathlib
 import sys
+import time
 
 import click
 import requests
@@ -101,18 +102,82 @@ def publish(ctx: click.Context, email_readers: bool, release_notes: str | None) 
     sys.exit(_handle_response(resp, err, f"Publish job started at {datetime.datetime.now(datetime.UTC)}"))
 
 
-@main.command(name="check-status")
+@main.command(name="book-summary")
 @click.pass_context
-def check_status(ctx: click.Context) -> None:
-    """Check the job status of a preview or publish."""
+def book_summary(ctx: click.Context) -> None:
+    """Get the book summary and metadata."""
     book_slug = ctx.obj["book_slug"]
-    print(f"Checking status of '{book_slug}'")
-    resp, err = ctx.obj["client"].check_status(book_slug=book_slug)
+    print(f"Getting summary for '{book_slug}'")
+    resp, err = ctx.obj["client"].book_summary(book_slug=book_slug)
     if err is not None:
         print(err)
         sys.exit(1)
     if resp is not None and resp.status_code == 200:
-        print(f"Status: {resp.json()}")
+        print(resp.json())
         sys.exit(0)
     print("Unknown error has occurred!")
+    sys.exit(1)
+
+
+@main.command(name="book-exists")
+@click.pass_context
+def book_exists(ctx: click.Context) -> None:
+    """Check if a book exists and get its state."""
+    book_slug = ctx.obj["book_slug"]
+    print(f"Checking if '{book_slug}' exists")
+    resp, err = ctx.obj["client"].book_exists(book_slug=book_slug)
+    if err is not None:
+        print(err)
+        sys.exit(1)
+    if resp is not None and resp.status_code == 200:
+        print(resp.json())
+        sys.exit(0)
+    print("Unknown error has occurred!")
+    sys.exit(1)
+
+
+@main.command()
+@click.pass_context
+def unpublish(ctx: click.Context) -> None:
+    """Unpublish the book."""
+    book_slug = ctx.obj["book_slug"]
+    print(f"Unpublishing '{book_slug}'")
+    resp, err = ctx.obj["client"].unpublish(book_slug=book_slug)
+    sys.exit(_handle_response(resp, err, f"Unpublish completed at {datetime.datetime.now(datetime.UTC)}"))
+
+
+@main.command(name="check-status")
+@click.option("--wait", is_flag=True, default=False, envvar="INPUT_WAIT", help="Poll until job completes.")
+@click.option("--poll-interval", default=5, type=int, envvar="INPUT_POLL_INTERVAL", help="Seconds between polls.")
+@click.option("--timeout", default=120, type=int, envvar="INPUT_TIMEOUT", help="Max seconds to wait.")
+@click.pass_context
+def check_status(ctx: click.Context, wait: bool, poll_interval: int, timeout: int) -> None:
+    """Check the job status of a preview or publish."""
+    book_slug = ctx.obj["book_slug"]
+    client = ctx.obj["client"]
+    print(f"Checking status of '{book_slug}'")
+
+    if not wait:
+        resp, err = client.check_status(book_slug=book_slug)
+        if err is not None:
+            print(err)
+            sys.exit(1)
+        if resp is not None and resp.status_code == 200:
+            print(f"Status: {resp.json()}")
+            sys.exit(0)
+        print("Unknown error has occurred!")
+        sys.exit(1)
+
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        resp, err = client.check_status(book_slug=book_slug)
+        if err is not None:
+            print(err)
+            sys.exit(1)
+        if resp is not None and resp.json() == {}:
+            print("Job complete.")
+            sys.exit(0)
+        print(f"Status: {resp.json()}")
+        time.sleep(poll_interval)
+    print(f"Timeout after {timeout}s")
     sys.exit(1)
