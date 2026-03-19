@@ -157,6 +157,34 @@ class TestBookSummaryCLI:
         assert "Unknown error has occurred!" in result.output
 
 
+class TestBookExistsCLI:
+    """Test the book-exists action path."""
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_exists(self, mock_cls):
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {"exists": True, "state": "published"}
+        mock_cls.return_value.book_exists.return_value = (mock_resp, None)
+        result = _invoke(*_base("book-exists"))
+        assert result.exit_code == 0
+        assert "True" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_error(self, mock_cls):
+        mock_cls.return_value.book_exists.return_value = (None, Exception("unauthorized"))
+        result = _invoke(*_base("book-exists"))
+        assert result.exit_code == 1
+        assert "unauthorized" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_unknown_error(self, mock_cls):
+        mock_resp = MagicMock(status_code=500)
+        mock_cls.return_value.book_exists.return_value = (mock_resp, None)
+        result = _invoke(*_base("book-exists"))
+        assert result.exit_code == 1
+        assert "Unknown error has occurred!" in result.output
+
+
 class TestCheckStatusCLI:
     """Test the check_status action path."""
 

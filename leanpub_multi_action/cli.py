@@ -118,6 +118,23 @@ def book_summary(ctx: click.Context) -> None:
     sys.exit(1)
 
 
+@main.command(name="book-exists")
+@click.pass_context
+def book_exists(ctx: click.Context) -> None:
+    """Check if a book exists and get its state."""
+    book_slug = ctx.obj["book_slug"]
+    print(f"Checking if '{book_slug}' exists")
+    resp, err = ctx.obj["client"].book_exists(book_slug=book_slug)
+    if err is not None:
+        print(err)
+        sys.exit(1)
+    if resp is not None and resp.status_code == 200:
+        print(resp.json())
+        sys.exit(0)
+    print("Unknown error has occurred!")
+    sys.exit(1)
+
+
 @main.command(name="check-status")
 @click.pass_context
 def check_status(ctx: click.Context) -> None:

@@ -122,6 +122,43 @@ class TestBookSummary:
         assert isinstance(err, requests.RequestException)
 
 
+class TestBookExists:
+    """Test the book_exists API call."""
+
+    def test_exists(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(
+                f"https://leanpub.com/{SLUG}/exists.json",
+                json={"exists": True, "state": "published"},
+                status_code=200,
+            )
+            resp, err = client.book_exists(SLUG)
+        assert err is None
+        assert resp.json()["exists"] is True
+        assert f"api_key={API_KEY}" in resp.request.url
+
+    def test_not_exists(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(
+                f"https://leanpub.com/{SLUG}/exists.json",
+                json={"exists": False},
+                status_code=200,
+            )
+            resp, err = client.book_exists(SLUG)
+        assert err is None
+        assert resp.json()["exists"] is False
+
+    def test_http_error(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.get(f"https://leanpub.com/{SLUG}/exists.json", status_code=401)
+            resp, err = client.book_exists(SLUG)
+        assert resp is None
+        assert isinstance(err, requests.RequestException)
+
+
 class TestCheckStatus:
     """Test the check_status API call."""
 
