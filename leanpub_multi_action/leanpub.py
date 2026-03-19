@@ -109,7 +109,7 @@ class Leanpub(requests.Session):
             book_slug (str): book_slug to check status of
 
         """
-        url = f"{self.leanpub_url}{book_slug}/book_status.json"
+        url = f"{self.leanpub_url}{book_slug}/job_status.json"
         params = {"api_key": self.leanpub_api_key}
         try:
             resp = self.get(url=url, params=params)

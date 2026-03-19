@@ -104,7 +104,7 @@ class TestCheckStatus:
         client = _client()
         with rm.Mocker() as m:
             m.get(
-                f"https://leanpub.com/{SLUG}/book_status.json",
+                f"https://leanpub.com/{SLUG}/job_status.json",
                 json={"status": "working"},
                 status_code=200,
             )
@@ -116,7 +116,7 @@ class TestCheckStatus:
     def test_http_error(self):
         client = _client()
         with rm.Mocker() as m:
-            m.get(f"https://leanpub.com/{SLUG}/book_status.json", status_code=404)
+            m.get(f"https://leanpub.com/{SLUG}/job_status.json", status_code=404)
             resp, err = client.check_status(SLUG)
         assert resp is None
         assert isinstance(err, requests.RequestException)
