@@ -135,11 +135,19 @@ class TestCheckStatusCLI:
     @patch("leanpub_multi_action.cli.Leanpub")
     def test_success(self, mock_cls):
         mock_resp = MagicMock(status_code=200)
-        mock_resp.json.return_value = {"status": "complete"}
+        mock_resp.json.return_value = {"status": "working", "job_type": "GenerateBookJob#preview"}
         mock_cls.return_value.check_status.return_value = (mock_resp, None)
         result = _invoke(*_base("check-status"))
         assert result.exit_code == 0
-        assert "complete" in result.output
+        assert "working" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_no_job_running(self, mock_cls):
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {}
+        mock_cls.return_value.check_status.return_value = (mock_resp, None)
+        result = _invoke(*_base("check-status"))
+        assert result.exit_code == 0
 
     @patch("leanpub_multi_action.cli.Leanpub")
     def test_error(self, mock_cls):
