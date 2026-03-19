@@ -129,6 +129,34 @@ class TestPublishCLI:
         assert "Publish job started" in result.output
 
 
+class TestBookSummaryCLI:
+    """Test the book-summary action path."""
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_success(self, mock_cls):
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {"slug": SLUG, "title": "My Book"}
+        mock_cls.return_value.book_summary.return_value = (mock_resp, None)
+        result = _invoke(*_base("book-summary"))
+        assert result.exit_code == 0
+        assert SLUG in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_error(self, mock_cls):
+        mock_cls.return_value.book_summary.return_value = (None, Exception("not found"))
+        result = _invoke(*_base("book-summary"))
+        assert result.exit_code == 1
+        assert "not found" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_unknown_error(self, mock_cls):
+        mock_resp = MagicMock(status_code=500)
+        mock_cls.return_value.book_summary.return_value = (mock_resp, None)
+        result = _invoke(*_base("book-summary"))
+        assert result.exit_code == 1
+        assert "Unknown error has occurred!" in result.output
+
+
 class TestCheckStatusCLI:
     """Test the check_status action path."""
 

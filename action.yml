@@ -13,7 +13,7 @@ inputs:
     description: "Leanpub Book Slug"
     required: true
   action:
-    description: "Action to perform: preview, publish, or check-status"
+    description: "Action to perform: preview, publish, check-status, or book-summary"
     required: true
   email-readers:
     description: "Email readers about the new publish (publish only)"

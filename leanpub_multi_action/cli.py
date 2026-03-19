@@ -101,6 +101,23 @@ def publish(ctx: click.Context, email_readers: bool, release_notes: str | None) 
     sys.exit(_handle_response(resp, err, f"Publish job started at {datetime.datetime.now(datetime.UTC)}"))
 
 
+@main.command(name="book-summary")
+@click.pass_context
+def book_summary(ctx: click.Context) -> None:
+    """Get the book summary and metadata."""
+    book_slug = ctx.obj["book_slug"]
+    print(f"Getting summary for '{book_slug}'")
+    resp, err = ctx.obj["client"].book_summary(book_slug=book_slug)
+    if err is not None:
+        print(err)
+        sys.exit(1)
+    if resp is not None and resp.status_code == 200:
+        print(resp.json())
+        sys.exit(0)
+    print("Unknown error has occurred!")
+    sys.exit(1)
+
+
 @main.command(name="check-status")
 @click.pass_context
 def check_status(ctx: click.Context) -> None:
