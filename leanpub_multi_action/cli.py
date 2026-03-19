@@ -135,6 +135,16 @@ def book_exists(ctx: click.Context) -> None:
     sys.exit(1)
 
 
+@main.command()
+@click.pass_context
+def unpublish(ctx: click.Context) -> None:
+    """Unpublish the book."""
+    book_slug = ctx.obj["book_slug"]
+    print(f"Unpublishing '{book_slug}'")
+    resp, err = ctx.obj["client"].unpublish(book_slug=book_slug)
+    sys.exit(_handle_response(resp, err, f"Unpublish completed at {datetime.datetime.now(datetime.UTC)}"))
+
+
 @main.command(name="check-status")
 @click.pass_context
 def check_status(ctx: click.Context) -> None:

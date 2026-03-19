@@ -22,7 +22,7 @@ Preview, publish, and check job status for your Leanpub books — directly from 
 |------|----------|---------|-------------|
 | `leanpub-api-key` | Yes | — | Leanpub API key (requires a [Pro plan](https://leanpub.com/help/api)). Store as a [GitHub Secret](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions). |
 | `leanpub-book-slug` | Yes | — | Book slug — the path component after `https://leanpub.com/`. |
-| `action` | Yes | — | Action to perform: `preview`, `publish`, `check-status`, `book-summary`, or `book-exists`. |
+| `action` | Yes | — | Action to perform: `preview`, `publish`, `unpublish`, `check-status`, `book-summary`, or `book-exists`. |
 | `email-readers` | No | `"false"` | Email readers about a new publish. Only used with `publish`. |
 | `release-notes` | No | — | Release notes for the publish. Only used with `publish`. |
 | `subset` | No | `"false"` | Preview only the files listed in `Subset.txt`. Only used with `preview`. |
@@ -96,6 +96,17 @@ The output PDF is saved as `{slug}-single-file.pdf` in your Dropbox previews fol
     release-notes: "Chapter 5 added"
 ```
 
+### Unpublish
+
+```yaml
+- name: "Unpublish"
+  uses: "lykinsbd/leanpub-multi-action@v2"
+  with:
+    leanpub-api-key: "${{ secrets.LEANPUB_API_KEY }}"
+    leanpub-book-slug: "mygreatbook"
+    action: "unpublish"
+```
+
 ### Check job status
 
 ```yaml
@@ -150,6 +161,7 @@ lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook preview
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook preview --subset
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook preview --single-file chapter.md
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook publish --email-readers --release-notes "v2"
+lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook unpublish
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook check-status
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook book-summary
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook book-exists
