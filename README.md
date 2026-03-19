@@ -27,6 +27,9 @@ Preview, publish, and check job status for your Leanpub books — directly from 
 | `release-notes` | No | — | Release notes for the publish. Only used with `publish`. |
 | `subset` | No | `"false"` | Preview only the files listed in `Subset.txt`. Only used with `preview`. |
 | `single-file` | No | — | Path to a Markdown file for single-file preview. Only used with `preview`. |
+| `wait` | No | `"false"` | Poll until job completes. Only used with `check-status`. |
+| `poll-interval` | No | `"5"` | Seconds between polls. Only used with `check-status --wait`. |
+| `timeout` | No | `"120"` | Max seconds to wait. Only used with `check-status --wait`. |
 
 ## Examples
 
@@ -118,6 +121,20 @@ The output PDF is saved as `{slug}-single-file.pdf` in your Dropbox previews fol
     action: "check-status"
 ```
 
+### Poll until job completes
+
+```yaml
+- name: "Wait for Preview"
+  uses: "lykinsbd/leanpub-multi-action@v2"
+  with:
+    leanpub-api-key: "${{ secrets.LEANPUB_API_KEY }}"
+    leanpub-book-slug: "mygreatbook"
+    action: "check-status"
+    wait: "true"
+    poll-interval: "10"
+    timeout: "300"
+```
+
 ### Get book summary
 
 Retrieve book metadata including download URLs, word count, and sales info:
@@ -163,6 +180,7 @@ lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook preview --single-file cha
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook publish --email-readers --release-notes "v2"
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook unpublish
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook check-status
+lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook check-status --wait --timeout 300
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook book-summary
 lma --leanpub-api-key YOUR_KEY --book-slug mygreatbook book-exists
 ```

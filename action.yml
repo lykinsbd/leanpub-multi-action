@@ -29,6 +29,18 @@ inputs:
   single-file:
     description: "Path to a Markdown file for single file preview (preview only)"
     required: false
+  wait:
+    description: "Poll until job completes (check-status only)"
+    required: false
+    default: "false"
+  poll-interval:
+    description: "Seconds between polls (check-status --wait only)"
+    required: false
+    default: "5"
+  timeout:
+    description: "Max seconds to wait (check-status --wait only)"
+    required: false
+    default: "120"
 runs:
   using: "docker"
   image: "docker://ghcr.io/lykinsbd/leanpub-multi-action:latest"
