@@ -136,6 +136,23 @@ class Leanpub(requests.Session):
 
         return resp, None
 
+    def unpublish(self, book_slug: str) -> tuple[requests.Response | None, requests.RequestException | None]:
+        """Unpublish the book.
+
+        Args:
+            book_slug (str): book_slug to unpublish
+
+        """
+        url = f"{self.leanpub_url}{book_slug}/unpublish.json"
+        data = {"api_key": self.leanpub_api_key}
+        try:
+            resp = self.post(url=url, data=data)
+            resp.raise_for_status()
+        except requests.RequestException as exception:
+            return None, exception
+
+        return resp, None
+
     def check_status(self, book_slug: str) -> tuple[requests.Response | None, requests.RequestException | None]:
         """Check the job status of a Preview or Publish for the book_slug provided.
 

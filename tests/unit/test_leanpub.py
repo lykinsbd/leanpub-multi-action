@@ -159,6 +159,27 @@ class TestBookExists:
         assert isinstance(err, requests.RequestException)
 
 
+class TestUnpublish:
+    """Test the unpublish API call."""
+
+    def test_success(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.post(f"https://leanpub.com/{SLUG}/unpublish.json", status_code=200)
+            resp, err = client.unpublish(SLUG)
+        assert err is None
+        assert resp.status_code == 200
+        assert f"api_key={API_KEY}" in resp.request.body
+
+    def test_http_error(self):
+        client = _client()
+        with rm.Mocker() as m:
+            m.post(f"https://leanpub.com/{SLUG}/unpublish.json", status_code=403)
+            resp, err = client.unpublish(SLUG)
+        assert resp is None
+        assert isinstance(err, requests.RequestException)
+
+
 class TestCheckStatus:
     """Test the check_status API call."""
 

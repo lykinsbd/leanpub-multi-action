@@ -185,6 +185,25 @@ class TestBookExistsCLI:
         assert "Unknown error has occurred!" in result.output
 
 
+class TestUnpublishCLI:
+    """Test the unpublish action path."""
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_success(self, mock_cls):
+        mock_resp = MagicMock(status_code=200)
+        mock_cls.return_value.unpublish.return_value = (mock_resp, None)
+        result = _invoke(*_base("unpublish"))
+        assert result.exit_code == 0
+        assert "Unpublish completed at" in result.output
+
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_error(self, mock_cls):
+        mock_cls.return_value.unpublish.return_value = (None, Exception("forbidden"))
+        result = _invoke(*_base("unpublish"))
+        assert result.exit_code == 1
+        assert "forbidden" in result.output
+
+
 class TestCheckStatusCLI:
     """Test the check_status action path."""
 
