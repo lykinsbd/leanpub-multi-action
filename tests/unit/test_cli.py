@@ -238,3 +238,38 @@ class TestCheckStatusCLI:
         result = _invoke(*_base("check-status"))
         assert result.exit_code == 1
         assert "Unknown error has occurred!" in result.output
+
+
+class TestCheckStatusWaitCLI:
+    """Test the check-status --wait polling."""
+
+    @patch("leanpub_multi_action.cli.time")
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_wait_completes(self, mock_cls, mock_time):
+        mock_time.monotonic = MagicMock(side_effect=[0, 1, 2])
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {}
+        mock_cls.return_value.check_status.return_value = (mock_resp, None)
+        result = _invoke(*_base("check-status"), "--wait", "--timeout", "10")
+        assert result.exit_code == 0
+        assert "Job complete." in result.output
+
+    @patch("leanpub_multi_action.cli.time")
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_wait_timeout(self, mock_cls, mock_time):
+        mock_time.monotonic = MagicMock(side_effect=[0, 200])
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = {"status": "working"}
+        mock_cls.return_value.check_status.return_value = (mock_resp, None)
+        result = _invoke(*_base("check-status"), "--wait", "--timeout", "10")
+        assert result.exit_code == 1
+        assert "Timeout" in result.output
+
+    @patch("leanpub_multi_action.cli.time")
+    @patch("leanpub_multi_action.cli.Leanpub")
+    def test_wait_error(self, mock_cls, mock_time):
+        mock_time.monotonic = MagicMock(side_effect=[0, 1])
+        mock_cls.return_value.check_status.return_value = (None, Exception("network error"))
+        result = _invoke(*_base("check-status"), "--wait", "--timeout", "10")
+        assert result.exit_code == 1
+        assert "network error" in result.output
